@@ -55,3 +55,19 @@ html,body,#app{touch-action:pan-y;}
   .member-fixed-actions{grid-template-columns:1.35fr 1fr .72fr}
   .member-fixed-actions .btn{padding:9px 6px;font-size:12px}
 }
+
+.fact-note{margin-top:5px;font-size:9px;line-height:1.35;color:var(--muted-2);font-weight:650}
+.editable-fact{position:relative}
+.fact-action{margin-top:8px;width:100%;border:1px solid #F0CFB1;background:var(--orange-soft);color:var(--orange-deep);border-radius:9px;padding:7px 8px;font-size:10px;font-weight:850}
+.fact-select{margin-top:7px;width:100%;border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 8px;font-size:10px;color:var(--ink)}
+.fact-referrer .v{line-height:1.35}
+.fact-own-deal{background:var(--orange-soft-2);border-color:#F0D8C4}
+.member-own-deals{display:grid;gap:7px}
+.member-deal-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px;background:#FCFBFA}
+.member-deal-row strong{display:block;font-size:12px;color:var(--ink-strong)}
+.member-deal-row small{display:block;margin-top:3px;font-size:10px;color:var(--muted);line-height:1.4}
+.member-deal-row .btn{flex:0 0 auto;white-space:nowrap}
+@media(max-width:760px){
+  .fact-action{font-size:10px}
+  .member-deal-row{align-items:flex-start}
+}
