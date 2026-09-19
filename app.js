@@ -196,7 +196,7 @@ function renderMembers(){
       avatarHtml(m)+
       '<div>'+
         '<div class="card-name">'+esc(memberDisplay(m))+' <span class="badge '+badgeClass+'">'+esc(statusLabel[m.status]||m.status)+'</span></div>'+
-        '<div class="card-sub">'+lineNote+'<span class="code">'+esc(m.referral_code||'')+'</span> · 來源：'+esc(memberDisplay(referrer))+'</div>'+
+        '<div class="card-sub">'+lineNote+'<span class="code">'+esc(m.referral_code||'')+'</span> · 來源：'+esc(lineDisplay(referrer))+'</div>'+
         '<div class="meta-row">'+
           '<span class="mini-stat">已推薦 '+referrals+'</span>'+
           '<span class="mini-stat">成交 '+deals+'</span>'+
@@ -218,9 +218,9 @@ function renderReferrals(){
     const child=memberById(r.referred_member_id);
     const parent=memberById(r.referrer_member_id);
     return '<article class="simple-card">'+
-      '<div class="side"><div class="card-name">'+esc(memberDisplay(parent))+'</div><div class="card-sub">'+esc(parent?.referral_code||'推薦人')+'</div></div>'+
+      '<div class="side"><div class="card-name">'+esc(lineDisplay(parent))+'</div><div class="card-sub">'+esc(parent?.referral_code||'推薦人')+'</div></div>'+
       '<div class="mid">→</div>'+
-      '<div class="side"><div class="card-name">'+esc(memberDisplay(child))+'</div><div class="card-sub">'+esc(child?.referral_code||'被推薦人')+' · '+fmtDate(r.created_at)+'</div></div>'+
+      '<div class="side"><div class="card-name">'+esc(lineDisplay(child))+'</div><div class="card-sub">'+esc(child?.referral_code||'被推薦人')+' · '+fmtDate(r.created_at)+'</div></div>'+
     '</article>';
   }).join('');
   $('referralsEmpty').classList.toggle('hidden',state.referrals.length>0);
@@ -343,30 +343,44 @@ function openMember(id){
   const referralDeals=referredConversions(id);
   const ownDeals=ownConversions(id);
   const cms=commissionsForMember(id);
-  const totalDeal=referralDeals.reduce(function(s,c){ return s+Number(c.gross_amount||0); },0);
-  const totalCommission=cms.reduce(function(s,c){ return s+Number(c.amount||0); },0);
-  const pending=cms.filter(function(c){ return c.status==='approved'; }).reduce(function(s,c){ return s+Number(c.amount||0); },0);
+  const totalDeal=referralDeals.reduce(function(sum,c){ return sum+Number(c.gross_amount||0); },0);
+  const ownDealTotal=ownDeals.reduce(function(sum,c){ return sum+Number(c.gross_amount||0); },0);
+  const totalCommission=cms.reduce(function(sum,c){ return sum+Number(c.amount||0); },0);
+  const pending=cms.filter(function(c){ return c.status==='approved'; }).reduce(function(sum,c){ return sum+Number(c.amount||0); },0);
   const events=state.events.filter(function(e){ return e.member_id===id; }).slice(0,12);
+
+  const referrerFact = rel
+    ? '<div class="fact fact-referrer"><div class="k">直接推薦人</div><div class="v">'+esc(lineDisplay(referrer))+'</div><div class="fact-note">'+esc(referrer?.referral_code||'')+'</div></div>'
+    : '<div class="fact fact-referrer editable-fact"><div class="k">直接推薦人</div><select id="memberReferrerSelect" class="fact-select"><option value="">請選擇 LINE 名稱</option>'+
+        state.members.filter(function(x){ return x.id!==m.id && x.status==='active'; }).map(function(x){
+          return '<option value="'+x.id+'">'+esc(lineDisplay(x))+'｜'+esc(x.referral_code||'')+'</option>';
+        }).join('')+
+      '</select><button class="fact-action" id="setMemberReferrer">設定</button></div>';
+
+  const ownDealRows = ownDeals.length
+    ? '<div class="member-own-deals">'+ownDeals.map(function(c){
+        const ref=memberById(c.referrer_member_id);
+        return '<div class="member-deal-row">'+
+          '<div><strong>'+esc(c.deal_name||'未命名案件')+'</strong><small>成交 '+fmtMoney(c.gross_amount)+' · 推薦人 '+esc(lineDisplay(ref))+'</small></div>'+
+          '<button class="btn soft member-edit-deal" data-deal-id="'+c.id+'">修改金額</button>'+
+        '</div>';
+      }).join('')+'</div>'
+    : '';
 
   $('memberDetail').innerHTML=
     '<div class="profile-head">'+avatarHtml(m)+'<div><div class="card-name">'+esc(memberDisplay(m))+'</div><div class="card-sub">LINE：'+esc(lineDisplay(m))+' · <span class="code">'+esc(m.referral_code||'')+'</span></div></div></div>'+
     '<div class="facts">'+
-      '<div class="fact"><div class="k">直接推薦人</div><div class="v">'+esc(memberDisplay(referrer))+'</div></div>'+
+      referrerFact+
       '<div class="fact"><div class="k">已推薦人數</div><div class="v">'+referrals.length+'</div></div>'+
-      '<div class="fact"><div class="k">推薦成交</div><div class="v">'+referralDeals.length+' 筆</div></div>'+
-      '<div class="fact"><div class="k">推薦成交總額</div><div class="v">'+fmtMoney(totalDeal)+'</div></div>'+
-      '<div class="fact"><div class="k">累積獎金</div><div class="v">'+fmtMoney(totalCommission)+'</div></div>'+
-      '<div class="fact"><div class="k">待發獎金</div><div class="v">'+fmtMoney(pending)+'</div></div>'+
-      '<div class="fact"><div class="k">本人案件</div><div class="v">'+ownDeals.length+' 筆</div></div>'+
+      '<div class="fact"><div class="k">推薦成交</div><div class="v">'+referralDeals.length+' 筆</div><div class="fact-note">由成交資料自動計算</div></div>'+
+      '<div class="fact"><div class="k">推薦成交總額</div><div class="v">'+fmtMoney(totalDeal)+'</div><div class="fact-note">由成交資料自動計算</div></div>'+
+      '<div class="fact"><div class="k">累積獎金</div><div class="v">'+fmtMoney(totalCommission)+'</div><div class="fact-note">依案件金額自動計算</div></div>'+
+      '<div class="fact"><div class="k">待發獎金</div><div class="v">'+fmtMoney(pending)+'</div><div class="fact-note">符合條件後才會列入</div></div>'+
+      '<div class="fact editable-fact fact-own-deal"><div class="k">本人案件</div><div class="v">'+ownDeals.length+' 筆 · '+fmtMoney(ownDealTotal)+'</div><button class="fact-action" id="addMemberDeal">＋ 新增／輸入金額</button></div>'+
       '<div class="fact"><div class="k">首次進入</div><div class="v">'+fmtDate(m.first_seen_at)+'</div></div>'+
       '<div class="fact" style="grid-column:1/-1"><div class="k">LINE User ID</div><div class="v"><span class="code">'+esc(m.line_user_id)+'</span> <button class="btn linkish" id="copyUserId">複製</button></div></div>'+
     '</div>'+
-    (!rel
-      ? '<div class="referrer-edit"><div class="section-title">補登直接推薦人</div><div class="field"><select id="memberReferrerSelect"><option value="">請選擇推薦人</option>'+
-          state.members.filter(function(x){ return x.id!==m.id && x.status==='active'; }).map(function(x){ return '<option value="'+x.id+'">'+esc(memberDisplay(x))+'｜'+esc(x.referral_code||'')+'</option>'; }).join('')+
-        '</select></div><button class="btn soft" id="setMemberReferrer">設定推薦人</button><div class="hint">只有系統沒有記到來源時才使用，設定後不會任意覆蓋。</div></div>'
-      : '')+
-    '<div class="member-deal-shortcut"><button class="btn soft" id="addMemberDeal">＋ 為此會員新增成交／輸入金額</button></div>'+
+    (ownDeals.length ? '<div class="section-title">本人案件／金額</div>'+ownDealRows : '')+
     '<div class="section-title">管理備註</div>'+
     '<div class="field"><label>備註名稱</label><input id="memberAdminName" value="'+esc(m.admin_name||'')+'" placeholder="例如 王小姐－醫美客戶" /></div>'+
     '<div class="field"><label>備註</label><textarea id="memberAdminNote" rows="3" placeholder="只有管理員看得到">'+esc(m.admin_note||'')+'</textarea></div>'+
@@ -390,12 +404,24 @@ function openMember(id){
     '<button class="btn danger" id="deleteMember">刪除</button>';
 
   $('memberModal').classList.remove('hidden');
+
   $('copyUserId').addEventListener('click',function(){
     navigator.clipboard.writeText(m.line_user_id||'');
     toast('User ID 已複製');
   });
-  if($('setMemberReferrer')) $('setMemberReferrer').addEventListener('click',function(){ setDirectReferrer(m.id); });
-  $('addMemberDeal').addEventListener('click',function(){ openDealModal(m.id,null); });
+
+  if($('setMemberReferrer')){
+    $('setMemberReferrer').addEventListener('click',function(){ setDirectReferrer(m.id); });
+  }
+
+  $('addMemberDeal').addEventListener('click',function(){
+    openDealModal(m.id,null);
+  });
+
+  document.querySelectorAll('.member-edit-deal').forEach(function(btn){
+    btn.addEventListener('click',function(){ openDealModal(null,btn.dataset.dealId); });
+  });
+
   $('saveMember').addEventListener('click',function(){ saveMember(m.id); });
   $('toggleMember').addEventListener('click',function(){ toggleMember(m.id,m.status); });
   $('deleteMember').addEventListener('click',function(){ deleteMember(m.id); });
