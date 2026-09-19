@@ -278,13 +278,13 @@ function renderConversions(){
   }).join('');
 
   $('conversionsEmpty').classList.toggle('hidden',state.conversions.length>0);
-  document.querySelectorAll('.mark-deposit').forEach(function(btn){
+  document.querySelectorAll('#conversionsList .mark-deposit').forEach(function(btn){
     btn.addEventListener('click',function(){ markDeposit(btn.dataset.id); });
   });
-  document.querySelectorAll('.mark-final').forEach(function(btn){
+  document.querySelectorAll('#conversionsList .mark-final').forEach(function(btn){
     btn.addEventListener('click',function(){ if(!btn.disabled) markFinal(btn.dataset.id); });
   });
-  document.querySelectorAll('.pay-commission').forEach(function(btn){
+  document.querySelectorAll('#conversionsList .pay-commission').forEach(function(btn){
     btn.addEventListener('click',function(){ markPaid(btn.dataset.id); });
   });
 }
@@ -322,7 +322,7 @@ function renderCommissions(){
   }).join('');
 
   $('commissionsEmpty').classList.toggle('hidden',rows.length>0);
-  document.querySelectorAll('.pay-commission').forEach(function(btn){
+  document.querySelectorAll('#commissionsList .pay-commission').forEach(function(btn){
     btn.addEventListener('click',function(){ markPaid(btn.dataset.id); });
   });
 }
