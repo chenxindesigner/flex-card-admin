@@ -12,6 +12,7 @@ const esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g,fu
 const state = { members:[], referrals:[], conversions:[], commissions:[], events:[] };
 let activeMemberId = null;
 let commissionFilter = 'all';
+let dealEditingId = null;
 
 const statusLabel = {active:'正常',inactive:'停用',blocked:'封鎖',pending:'未到期',approved:'待發',paid:'已發',void:'作廢',confirmed:'已確認',cancelled:'取消',refunded:'退款'};
 const eventLabel = {
@@ -274,6 +275,7 @@ function renderConversions(){
         '<div style="text-align:right"><div class="money">'+fmtMoney(c.gross_amount)+'</div><div class="card-sub">總獎金 '+fmtMoney(c.commission_amount||0)+'</div></div>'+
       '</div>'+
       '<div class="stage-grid">'+stageHtml(c,'deposit')+stageHtml(c,'final')+'</div>'+
+      '<div class="deal-actions"><button class="btn linkish edit-deal" data-id="'+c.id+'">修改成交</button></div>'+
     '</article>';
   }).join('');
 
@@ -286,6 +288,9 @@ function renderConversions(){
   });
   document.querySelectorAll('#conversionsList .pay-commission').forEach(function(btn){
     btn.addEventListener('click',function(){ markPaid(btn.dataset.id); });
+  });
+  document.querySelectorAll('#conversionsList .edit-deal').forEach(function(btn){
+    btn.addEventListener('click',function(){ openDealModal(null,btn.dataset.id); });
   });
 }
 
@@ -356,6 +361,12 @@ function openMember(id){
       '<div class="fact"><div class="k">首次進入</div><div class="v">'+fmtDate(m.first_seen_at)+'</div></div>'+
       '<div class="fact" style="grid-column:1/-1"><div class="k">LINE User ID</div><div class="v"><span class="code">'+esc(m.line_user_id)+'</span> <button class="btn linkish" id="copyUserId">複製</button></div></div>'+
     '</div>'+
+    (!rel
+      ? '<div class="referrer-edit"><div class="section-title">補登直接推薦人</div><div class="field"><select id="memberReferrerSelect"><option value="">請選擇推薦人</option>'+
+          state.members.filter(function(x){ return x.id!==m.id && x.status==='active'; }).map(function(x){ return '<option value="'+x.id+'">'+esc(memberDisplay(x))+'｜'+esc(x.referral_code||'')+'</option>'; }).join('')+
+        '</select></div><button class="btn soft" id="setMemberReferrer">設定推薦人</button><div class="hint">只有系統沒有記到來源時才使用，設定後不會任意覆蓋。</div></div>'
+      : '')+
+    '<div class="member-deal-shortcut"><button class="btn soft" id="addMemberDeal">＋ 為此會員新增成交／輸入金額</button></div>'+
     '<div class="section-title">管理備註</div>'+
     '<div class="field"><label>備註名稱</label><input id="memberAdminName" value="'+esc(m.admin_name||'')+'" placeholder="例如 王小姐－醫美客戶" /></div>'+
     '<div class="field"><label>備註</label><textarea id="memberAdminNote" rows="3" placeholder="只有管理員看得到">'+esc(m.admin_note||'')+'</textarea></div>'+
@@ -371,18 +382,20 @@ function openMember(id){
             return '<div class="event"><strong>'+esc(eventLabel[e.event_type]||e.button_key||e.event_type)+'</strong><small>'+fmtDate(e.occurred_at)+(e.button_key?' · '+esc(e.button_key):'')+'</small></div>';
           }).join('')
         : '<div class="empty">目前尚無互動紀錄</div>')+
-    '</div>'+
-    '<div class="modal-actions">'+
-      '<button class="btn primary" id="saveMember">儲存</button>'+
-      '<button class="btn" id="toggleMember">'+(m.status==='active'?'停用會員':'恢復會員')+'</button>'+
-      '<button class="btn danger" id="deleteMember">刪除</button>'+
     '</div>';
+
+  $('memberActions').innerHTML=
+    '<button class="btn primary" id="saveMember">儲存</button>'+
+    '<button class="btn" id="toggleMember">'+(m.status==='active'?'停用會員':'恢復會員')+'</button>'+
+    '<button class="btn danger" id="deleteMember">刪除</button>';
 
   $('memberModal').classList.remove('hidden');
   $('copyUserId').addEventListener('click',function(){
     navigator.clipboard.writeText(m.line_user_id||'');
     toast('User ID 已複製');
   });
+  if($('setMemberReferrer')) $('setMemberReferrer').addEventListener('click',function(){ setDirectReferrer(m.id); });
+  $('addMemberDeal').addEventListener('click',function(){ openDealModal(m.id,null); });
   $('saveMember').addEventListener('click',function(){ saveMember(m.id); });
   $('toggleMember').addEventListener('click',function(){ toggleMember(m.id,m.status); });
   $('deleteMember').addEventListener('click',function(){ deleteMember(m.id); });
@@ -397,6 +410,19 @@ async function saveMember(id){
   const res=await supabase.from('members').update(payload).eq('id',id);
   if(res.error){ console.error(res.error); toast('儲存失敗'); return; }
   toast('會員資料已更新');
+  await loadAll();
+}
+
+async function setDirectReferrer(memberId){
+  const sel=$('memberReferrerSelect');
+  const referrerId=sel ? sel.value : '';
+  if(!referrerId){ toast('請先選擇推薦人'); return; }
+  const res=await supabase.rpc('admin_set_direct_referrer',{
+    p_referred_member_id:memberId,
+    p_referrer_member_id:referrerId
+  });
+  if(res.error){ console.error(res.error); toast(res.error.message||'推薦人設定失敗'); return; }
+  toast('直接推薦人已補登');
   await loadAll();
 }
 
@@ -418,25 +444,69 @@ async function deleteMember(id){
   await loadAll();
 }
 
-$('addDealBtn').addEventListener('click',function(){
+function openDealModal(customerId,conversionId){
+  dealEditingId=conversionId||null;
+  const c=conversionId ? state.conversions.find(function(x){ return x.id===conversionId; }) : null;
+
+  $('dealForm').reset();
+  $('dealRate').value='10';
+  $('dealCustomer').disabled=false;
+
+  if(c){
+    $('dealModalTitle').textContent='修改成交';
+    $('dealModalHint').textContent='可修改案件名稱、成交金額、推薦獎金比例與備註；獎金已發放後會鎖定金額。';
+    $('dealSubmitBtn').textContent='儲存修改';
+    $('dealCustomer').value=c.customer_member_id||'';
+    $('dealCustomer').disabled=true;
+    $('dealName').value=c.deal_name||'';
+    $('dealAmount').value=Number(c.gross_amount||0);
+    $('dealRate').value=c.commission_rate==null ? '0' : String(Number(c.commission_rate)*100);
+    $('dealNotes').value=c.notes||'';
+  }else{
+    $('dealModalTitle').textContent='新增成交';
+    $('dealModalHint').textContent='輸入實際成交金額；推薦獎金預設 10%，再自動拆成訂金 50%＋結案 50%。';
+    $('dealSubmitBtn').textContent='建立成交';
+    if(customerId) $('dealCustomer').value=customerId;
+  }
+
   $('dealModal').classList.remove('hidden');
+}
+
+$('addDealBtn').addEventListener('click',function(){
+  openDealModal(null,null);
 });
 
 $('dealForm').addEventListener('submit', async function(e){
   e.preventDefault();
   const rate=Number($('dealRate').value||0)/100;
-  const res=await supabase.rpc('create_conversion_with_split',{
-    p_customer_member_id:$('dealCustomer').value,
-    p_deal_name:$('dealName').value.trim(),
-    p_gross_amount:Number($('dealAmount').value||0),
-    p_commission_rate:rate,
-    p_notes:$('dealNotes').value.trim()||null
-  });
-  if(res.error){ console.error(res.error); toast('建立成交失敗'); return; }
+  const amount=Number($('dealAmount').value||0);
+
+  let res;
+  if(dealEditingId){
+    res=await supabase.rpc('update_conversion_with_split',{
+      p_conversion_id:dealEditingId,
+      p_deal_name:$('dealName').value.trim(),
+      p_gross_amount:amount,
+      p_commission_rate:rate,
+      p_notes:$('dealNotes').value.trim()||null
+    });
+  }else{
+    res=await supabase.rpc('create_conversion_with_split',{
+      p_customer_member_id:$('dealCustomer').value,
+      p_deal_name:$('dealName').value.trim(),
+      p_gross_amount:amount,
+      p_commission_rate:rate,
+      p_notes:$('dealNotes').value.trim()||null
+    });
+  }
+
+  if(res.error){ console.error(res.error); toast(res.error.message||'成交資料儲存失敗'); return; }
   $('dealForm').reset();
   $('dealRate').value='10';
+  $('dealCustomer').disabled=false;
   $('dealModal').classList.add('hidden');
-  toast('成交已建立，獎金已拆成兩筆');
+  toast(dealEditingId?'成交金額已更新':'成交已建立，獎金已拆成兩筆');
+  dealEditingId=null;
   await loadAll();
 });
 
