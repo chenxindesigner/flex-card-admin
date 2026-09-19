@@ -98,22 +98,23 @@
 </div>
 
 <div id="memberModal" class="modal-backdrop hidden">
-  <div class="modal">
+  <div class="modal member-modal">
     <div class="modal-head"><div><h3>會員詳細資料</h3><div class="hint">推薦編號與 LINE User ID 為系統身分，不手動修改</div></div><button class="close-btn" data-close="memberModal">×</button></div>
-    <div id="memberDetail"></div>
+    <div id="memberDetail" class="member-modal-scroll"></div>
+    <div id="memberActions" class="member-fixed-actions"></div>
   </div>
 </div>
 
 <div id="dealModal" class="modal-backdrop hidden">
   <div class="modal">
-    <div class="modal-head"><div><h3>新增成交</h3><div class="hint">推薦獎金預設為成交金額 10%，再自動拆成訂金 50%＋結案 50%</div></div><button class="close-btn" data-close="dealModal">×</button></div>
+    <div class="modal-head"><div><h3 id="dealModalTitle">新增成交</h3><div class="hint" id="dealModalHint">輸入實際成交金額；推薦獎金預設 10%，再自動拆成訂金 50%＋結案 50%。</div></div><button class="close-btn" data-close="dealModal">×</button></div>
     <form id="dealForm">
       <div class="field"><label>客戶</label><select id="dealCustomer" required></select></div>
       <div class="field"><label>案件名稱</label><input id="dealName" placeholder="例如 LINE OA 建置" /></div>
       <div class="field"><label>成交金額</label><input id="dealAmount" type="number" min="0" step="1" required /></div>
       <div class="field"><label>推薦獎金比例（%）</label><input id="dealRate" type="number" min="0" max="100" step="0.1" value="10" required /></div>
       <div class="field"><label>備註</label><textarea id="dealNotes" rows="3"></textarea></div>
-      <div class="modal-actions"><button type="button" class="btn" data-close="dealModal">取消</button><button type="submit" class="btn primary">建立成交</button></div>
+      <div class="modal-actions"><button type="button" class="btn" data-close="dealModal">取消</button><button type="submit" class="btn primary" id="dealSubmitBtn">建立成交</button></div>
     </form>
   </div>
 </div>
