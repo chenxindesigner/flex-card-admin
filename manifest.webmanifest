@@ -1,0 +1,12 @@
+{
+  "name": "Flex Card 後台",
+  "short_name": "Flex Card",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F7F5F2",
+  "theme_color": "#E88935",
+  "icons": [
+    {"src": "apple-touch-icon.png", "sizes": "96x96", "type": "image/png"}
+  ]
+}
