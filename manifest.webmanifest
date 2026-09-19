@@ -7,6 +7,11 @@
   "background_color": "#F7F5F2",
   "theme_color": "#E88935",
   "icons": [
-    {"src": "apple-touch-icon.png", "sizes": "96x96", "type": "image/png"}
+    {
+      "src": "flex-card-icon-180.png?v=20260920b",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }
