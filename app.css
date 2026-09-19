@@ -39,3 +39,19 @@ body{min-height:100dvh}button,input,select,textarea{font:inherit;color:inherit}b
 html,body,#app{touch-action:pan-y;}
 .shell,.panel,.list,.summary,.topbar{max-width:100%;}
 *{min-width:0;}
+
+.member-modal{overflow:hidden;display:flex;flex-direction:column}
+.member-modal>.modal-head{flex:0 0 auto;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.member-modal-scroll{overflow:auto;min-height:0;padding-right:2px}
+.member-fixed-actions{flex:0 0 auto;display:grid;grid-template-columns:1.4fr 1fr .8fr;gap:7px;padding:11px 0 max(2px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fff}
+.member-fixed-actions .btn{width:100%}
+.member-deal-shortcut{margin:12px 0 6px}
+.member-deal-shortcut .btn{width:100%}
+.referrer-edit{margin:12px 0;padding:12px;border:1px solid #F0E2D6;background:var(--orange-soft-2);border-radius:13px}
+.referrer-edit .section-title{margin-top:0}
+.deal-actions{display:flex;justify-content:flex-end;margin-top:7px}
+@media(max-width:760px){
+  .member-modal{max-height:93dvh}
+  .member-fixed-actions{grid-template-columns:1.35fr 1fr .72fr}
+  .member-fixed-actions .btn{padding:9px 6px;font-size:12px}
+}
