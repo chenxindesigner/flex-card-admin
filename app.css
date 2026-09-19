@@ -6,7 +6,7 @@
   --shadow:0 10px 30px rgba(91,77,65,.075);--radius:18px
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+html,body{margin:0;width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior-x:none;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
 body{min-height:100dvh}button,input,select,textarea{font:inherit;color:inherit}button{-webkit-tap-highlight-color:transparent;cursor:pointer}.hidden{display:none!important}.app{min-height:100dvh}
 .login-wrap{min-height:100dvh;display:grid;place-items:center;padding:28px 18px}.login-card{width:min(100%,420px);background:var(--card);border:1px solid var(--line);border-radius:26px;padding:28px;box-shadow:var(--shadow)}
 .eyebrow{font-size:11px;letter-spacing:.14em;color:var(--orange-deep);font-weight:800}h1,h2,h3,p{margin-top:0}h1{font-size:27px;color:var(--ink-strong);margin:7px 0 6px}.sub{color:var(--muted);font-size:13px;line-height:1.7;margin:0 0 22px}
@@ -35,3 +35,7 @@ body{min-height:100dvh}button,input,select,textarea{font:inherit;color:inherit}b
 }
 
 #addDealBtn{white-space:nowrap;width:auto;flex:0 0 auto;padding-left:12px;padding-right:12px}
+
+html,body,#app{touch-action:pan-y;}
+.shell,.panel,.list,.summary,.topbar{max-width:100%;}
+*{min-width:0;}
