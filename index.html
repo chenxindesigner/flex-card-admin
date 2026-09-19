@@ -3,99 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#4B3A57" />
+  <meta name="theme-color" content="#E88935" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Flex Card 後台" />
+  <link rel="stylesheet" href="./app.css" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <link rel="icon" href="./apple-touch-icon.png" />
+  <link rel="manifest" href="./manifest.webmanifest" />
   <title>Flex Card 後台</title>
-  <style>
-    :root{
-      --bg:#f6f3ef;
-      --card:#ffffff;
-      --ink:#2d2930;
-      --muted:#817984;
-      --line:#e8e1e7;
-      --purple:#4b3a57;
-      --purple2:#6d567d;
-      --gold:#a78b5b;
-      --green:#2f7a56;
-      --red:#a54e4e;
-      --shadow:0 12px 32px rgba(61,48,69,.08);
-      --radius:20px;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
-    button,input,select,textarea{font:inherit}
-    button{cursor:pointer}
-    .hidden{display:none!important}
-    .app{min-height:100dvh}
-    .login-wrap{min-height:100dvh;display:grid;place-items:center;padding:28px 18px}
-    .login-card{width:min(100%,430px);background:var(--card);border:1px solid var(--line);border-radius:28px;padding:30px;box-shadow:var(--shadow)}
-    .eyebrow{font-size:12px;letter-spacing:.16em;color:var(--gold);font-weight:800}
-    h1{font-size:28px;margin:8px 0 6px}
-    .sub{color:var(--muted);font-size:14px;line-height:1.7;margin:0 0 24px}
-    .field{display:grid;gap:7px;margin:14px 0}
-    .field label{font-size:13px;font-weight:700;color:#5f5762}
-    .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:13px;padding:13px 14px;outline:none}
-    .field input:focus,.field select:focus,.field textarea:focus{border-color:#b6a2c2;box-shadow:0 0 0 3px rgba(109,86,125,.1)}
-    .primary{width:100%;border:0;border-radius:13px;padding:13px 16px;background:var(--purple);color:white;font-weight:800}
-    .error{margin-top:12px;color:var(--red);font-size:13px;line-height:1.6}
-    .shell{max-width:1180px;margin:0 auto;padding:18px 18px 92px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-    .brand h2{font-size:21px;margin:3px 0 0}
-    .brand small{color:var(--muted)}
-    .top-actions{display:flex;gap:8px}
-    .ghost{border:1px solid var(--line);background:white;color:var(--ink);border-radius:12px;padding:9px 12px}
-    .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 18px}
-    .metric{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 5px 18px rgba(61,48,69,.035)}
-    .metric .label{font-size:12px;color:var(--muted);font-weight:700}
-    .metric .value{font-size:26px;font-weight:900;margin-top:8px}
-    .metric .note{font-size:11px;color:var(--muted);margin-top:4px}
-    .tabs{display:flex;gap:8px;overflow:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
-    .tabs::-webkit-scrollbar{display:none}
-    .tab{white-space:nowrap;border:1px solid var(--line);background:#fff;color:#665f69;border-radius:999px;padding:9px 14px;font-weight:800;font-size:13px}
-    .tab.active{background:var(--purple);border-color:var(--purple);color:#fff}
-    .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;border-bottom:1px solid var(--line)}
-    .panel-head h3{font-size:16px;margin:0}
-    .panel-head .hint{font-size:12px;color:var(--muted);margin-top:4px}
-    .table-wrap{overflow:auto}
-    table{width:100%;border-collapse:collapse;min-width:760px}
-    th,td{padding:13px 16px;text-align:left;border-bottom:1px solid #f0ebef;font-size:13px;vertical-align:middle}
-    th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#8f8791;background:#fcfbfc}
-    td strong{font-weight:800}
-    .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--purple)}
-    .badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;background:#eee9f0;color:#5e4b69}
-    .badge.green{background:#e7f4ed;color:#2f704f}
-    .badge.gold{background:#f5efe3;color:#8c6c35}
-    .badge.red{background:#f8e9e9;color:#934848}
-    .empty{padding:34px 20px;text-align:center;color:var(--muted);font-size:13px}
-    .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px}
-    .mini{border:1px solid var(--line);border-radius:15px;padding:14px}
-    .mini .k{font-size:11px;color:var(--muted);font-weight:700}
-    .mini .v{font-size:18px;font-weight:900;margin-top:5px}
-    .modal-backdrop{position:fixed;inset:0;background:rgba(31,25,34,.5);display:grid;place-items:end center;padding:18px;z-index:30}
-    .modal{width:min(100%,520px);max-height:88dvh;overflow:auto;background:#fff;border-radius:24px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.25)}
-    .modal h3{margin:0 0 4px}
-    .modal .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .modal-actions{display:flex;gap:8px;margin-top:16px}
-    .modal-actions button{flex:1}
-    .danger{border:1px solid #e7caca;background:#fff;color:#9c4e4e;border-radius:12px;padding:11px 14px;font-weight:800}
-    .mobile-nav{display:none}
-    .toast{position:fixed;left:50%;bottom:82px;transform:translateX(-50%);background:#2f2932;color:#fff;padding:10px 14px;border-radius:999px;font-size:12px;z-index:50;box-shadow:0 8px 26px rgba(0,0,0,.2)}
-    @media(max-width:760px){
-      .shell{padding:14px 14px 100px}
-      .topbar{align-items:flex-start}
-      .summary{grid-template-columns:1fr 1fr}
-      .metric{padding:14px}
-      .metric .value{font-size:22px}
-      .desktop-tabs{display:none}
-      .mobile-nav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px;padding:7px;box-shadow:0 16px 40px rgba(44,35,49,.15)}
-      .mobile-nav button{border:0;background:transparent;color:#817884;border-radius:12px;padding:9px 4px;font-size:11px;font-weight:800}
-      .mobile-nav button.active{background:#eee8f1;color:var(--purple)}
-      .panel{border-radius:18px}
-      .panel-head{padding:15px}
-      .cards{grid-template-columns:1fr}
-      .modal .row{grid-template-columns:1fr}
-    }
-  </style>
 </head>
 <body>
 <div id="app" class="app">
@@ -103,17 +19,11 @@
     <div class="login-card">
       <div class="eyebrow">CHEN.XIN SYSTEM</div>
       <h1>Flex Card 後台</h1>
-      <p class="sub">推薦關係、成交與獎金管理。此後台僅開放管理員登入。</p>
+      <p class="sub">推薦關係、成交與兩段式獎金管理。此後台僅開放管理員登入。</p>
       <form id="loginForm">
-        <div class="field">
-          <label for="email">Email</label>
-          <input id="email" type="email" autocomplete="username" required />
-        </div>
-        <div class="field">
-          <label for="password">密碼</label>
-          <input id="password" type="password" autocomplete="current-password" required />
-        </div>
-        <button class="primary" type="submit">登入後台</button>
+        <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required /></div>
+        <div class="field"><label for="password">密碼</label><input id="password" type="password" autocomplete="current-password" required /></div>
+        <button class="btn primary" style="width:100%" type="submit">登入後台</button>
         <div id="loginError" class="error hidden"></div>
       </form>
     </div>
@@ -122,21 +32,15 @@
   <section id="dashboardView" class="hidden">
     <main class="shell">
       <header class="topbar">
-        <div class="brand">
-          <small>Flex Card Referral Admin</small>
-          <h2>推薦分潤後台</h2>
-        </div>
-        <div class="top-actions">
-          <button class="ghost" id="refreshBtn">更新</button>
-          <button class="ghost" id="logoutBtn">登出</button>
-        </div>
+        <div class="brand"><small>Flex Card Referral Admin</small><h2>推薦分潤後台</h2></div>
+        <div class="top-actions"><button class="btn" id="refreshBtn">更新</button><button class="btn" id="logoutBtn">登出</button></div>
       </header>
 
       <section class="summary">
-        <article class="metric"><div class="label">推薦會員</div><div class="value" id="mMembers">0</div><div class="note">已建立推薦編號</div></article>
-        <article class="metric"><div class="label">推薦關係</div><div class="value" id="mReferrals">0</div><div class="note">直接上一層</div></article>
-        <article class="metric"><div class="label">已確認成交</div><div class="value" id="mDeals">0</div><div class="note">confirmed</div></article>
-        <article class="metric"><div class="label">待發獎金</div><div class="value" id="mPending">$0</div><div class="note">尚未完成發放</div></article>
+        <button class="metric" data-jump="members"><div class="label">推薦會員</div><div class="value" id="mMembers">0</div><div class="note">點一下查看會員</div></button>
+        <button class="metric" data-jump="referrals"><div class="label">推薦關係</div><div class="value" id="mReferrals">0</div><div class="note">直接上一層</div></button>
+        <button class="metric" data-jump="conversions"><div class="label">已確認成交</div><div class="value" id="mDeals">0</div><div class="note">點一下查看案件</div></button>
+        <button class="metric" data-jump="commissions" data-filter="approved"><div class="label">待發獎金</div><div class="value orange" id="mPending">$0</div><div class="note">已到期尚未發放</div></button>
       </section>
 
       <nav class="tabs desktop-tabs">
@@ -147,23 +51,39 @@
       </nav>
 
       <section id="panel-members" class="panel">
-        <div class="panel-head"><div><h3>會員</h3><div class="hint">所有曾透過名片互動並建立身分的 LINE 使用者</div></div></div>
-        <div class="table-wrap"><table><thead><tr><th>編號</th><th>LINE 名稱</th><th>User ID</th><th>首次進入</th><th>最後互動</th><th>狀態</th></tr></thead><tbody id="membersBody"></tbody></table><div id="membersEmpty" class="empty hidden">目前尚無會員資料</div></div>
+        <div class="panel-head">
+          <div><h3>會員</h3><div class="hint">點會員卡片可看完整資料、編輯備註、停用或刪除</div></div>
+          <div class="panel-tools"><input id="memberSearch" class="search" placeholder="搜尋名稱或編號" /></div>
+        </div>
+        <div id="membersList" class="list"></div>
+        <div id="membersEmpty" class="empty hidden">目前尚無會員資料</div>
       </section>
 
       <section id="panel-referrals" class="panel hidden">
-        <div class="panel-head"><div><h3>推薦關係</h3><div class="hint">只記錄直接推薦人，不做多層分潤</div></div></div>
-        <div class="table-wrap"><table><thead><tr><th>被推薦人</th><th>直接推薦人</th><th>建立時間</th></tr></thead><tbody id="referralsBody"></tbody></table><div id="referralsEmpty" class="empty hidden">目前尚無推薦關係</div></div>
+        <div class="panel-head"><div><h3>推薦關係</h3><div class="hint">A 分享給 B，B 成交只算 A；B 再分享給 C，C 成交只算 B</div></div></div>
+        <div id="referralsList" class="list"></div>
+        <div id="referralsEmpty" class="empty hidden">目前尚無推薦關係</div>
       </section>
 
       <section id="panel-conversions" class="panel hidden">
-        <div class="panel-head"><div><h3>成交</h3><div class="hint">成交確認後可建立推薦獎金</div></div><button id="addDealBtn" class="ghost">＋ 新增成交</button></div>
-        <div class="table-wrap"><table><thead><tr><th>客戶</th><th>推薦人</th><th>成交金額</th><th>獎金</th><th>狀態</th><th>建立時間</th></tr></thead><tbody id="conversionsBody"></tbody></table><div id="conversionsEmpty" class="empty hidden">目前尚無成交資料</div></div>
+        <div class="panel-head">
+          <div><h3>成交</h3><div class="hint">訂金入帳先開放一半獎金，結案／尾款入帳再開放另一半</div></div>
+          <button id="addDealBtn" class="btn soft">＋ 新增成交</button>
+        </div>
+        <div id="conversionsList" class="list"></div>
+        <div id="conversionsEmpty" class="empty hidden">目前尚無成交資料</div>
       </section>
 
       <section id="panel-commissions" class="panel hidden">
-        <div class="panel-head"><div><h3>獎金</h3><div class="hint">管理待發、核准與已發放狀態</div></div></div>
-        <div class="table-wrap"><table><thead><tr><th>推薦人</th><th>獎金</th><th>狀態</th><th>核准時間</th><th>發放時間</th><th></th></tr></thead><tbody id="commissionsBody"></tbody></table><div id="commissionsEmpty" class="empty hidden">目前尚無獎金資料</div></div>
+        <div class="panel-head"><div><h3>獎金</h3><div class="hint">待發＝已符合發放條件；未到期＝尚未收訂金或尚未結案</div></div></div>
+        <div class="filter-chips">
+          <button class="chip active" data-cfilter="all">全部</button>
+          <button class="chip" data-cfilter="approved">待發</button>
+          <button class="chip" data-cfilter="pending">未到期</button>
+          <button class="chip" data-cfilter="paid">已發</button>
+        </div>
+        <div id="commissionsList" class="list"></div>
+        <div id="commissionsEmpty" class="empty hidden">目前尚無獎金資料</div>
       </section>
     </main>
 
@@ -176,210 +96,28 @@
   </section>
 </div>
 
+<div id="memberModal" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-head"><div><h3>會員詳細資料</h3><div class="hint">推薦編號與 LINE User ID 為系統身分，不手動修改</div></div><button class="close-btn" data-close="memberModal">×</button></div>
+    <div id="memberDetail"></div>
+  </div>
+</div>
+
 <div id="dealModal" class="modal-backdrop hidden">
   <div class="modal">
-    <h3>新增成交</h3>
-    <p class="sub">選擇已建立身分的客戶，系統會自動帶出他的直接推薦人。</p>
+    <div class="modal-head"><div><h3>新增成交</h3><div class="hint">推薦獎金預設為成交金額 10%，再自動拆成訂金 50%＋結案 50%</div></div><button class="close-btn" data-close="dealModal">×</button></div>
     <form id="dealForm">
       <div class="field"><label>客戶</label><select id="dealCustomer" required></select></div>
       <div class="field"><label>案件名稱</label><input id="dealName" placeholder="例如 LINE OA 建置" /></div>
-      <div class="row">
-        <div class="field"><label>成交金額</label><input id="dealAmount" type="number" min="0" step="1" required /></div>
-        <div class="field"><label>獎金比例</label><input id="dealRate" type="number" min="0" max="100" step="0.1" value="10" required /></div>
-      </div>
+      <div class="field"><label>成交金額</label><input id="dealAmount" type="number" min="0" step="1" required /></div>
+      <div class="field"><label>推薦獎金比例（%）</label><input id="dealRate" type="number" min="0" max="100" step="0.1" value="10" required /></div>
       <div class="field"><label>備註</label><textarea id="dealNotes" rows="3"></textarea></div>
-      <div class="modal-actions"><button type="button" class="ghost" id="cancelDeal">取消</button><button type="submit" class="primary">建立成交</button></div>
+      <div class="modal-actions"><button type="button" class="btn" data-close="dealModal">取消</button><button type="submit" class="btn primary">建立成交</button></div>
     </form>
   </div>
 </div>
 
 <div id="toast" class="toast hidden"></div>
-
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-  const SUPABASE_URL = 'https://tzdaqrfsgwijbswfxlwj.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_h03xmzLjgPwMuPdyR26o2g_m22WIaO6';
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  const $ = (id) => document.getElementById(id);
-  const fmtMoney = (n) => new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maximumFractionDigits:0}).format(Number(n||0));
-  const fmtDate = (v) => v ? new Intl.DateTimeFormat('zh-TW',{dateStyle:'short',timeStyle:'short'}).format(new Date(v)) : '—';
-  const esc = (s='') => String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  const shortId = (s='') => s ? s.slice(0,7)+'…'+s.slice(-5) : '—';
-
-  let state = { members:[], referrals:[], conversions:[], commissions:[] };
-
-  function toast(msg){
-    $('toast').textContent=msg; $('toast').classList.remove('hidden');
-    setTimeout(()=>$('toast').classList.add('hidden'),2200);
-  }
-
-  function showLogin(message=''){
-    $('dashboardView').classList.add('hidden');
-    $('loginView').classList.remove('hidden');
-    if(message){ $('loginError').textContent=message; $('loginError').classList.remove('hidden'); }
-  }
-
-  function showDashboard(){
-    $('loginView').classList.add('hidden');
-    $('dashboardView').classList.remove('hidden');
-  }
-
-  async function verifyStaff(){
-    const { data, error } = await supabase.from('system_settings').select('id').limit(1);
-    if(error){
-      if(error.code === '42501' || /row-level|permission/i.test(error.message||'')) return false;
-      throw error;
-    }
-    return Array.isArray(data);
-  }
-
-  async function boot(){
-    const { data:{ session } } = await supabase.auth.getSession();
-    if(!session){ showLogin(); return; }
-    try{
-      const ok = await verifyStaff();
-      if(!ok){ showLogin('這個帳號已登入，但尚未被加入 Flex Card 後台管理員。'); return; }
-      showDashboard();
-      await loadAll();
-    }catch(e){
-      showLogin('無法讀取後台權限：'+(e.message||e));
-    }
-  }
-
-  $('loginForm').addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    $('loginError').classList.add('hidden');
-    const email=$('email').value.trim(), password=$('password').value;
-    const { error } = await supabase.auth.signInWithPassword({email,password});
-    if(error){ $('loginError').textContent='登入失敗：'+error.message; $('loginError').classList.remove('hidden'); return; }
-    await boot();
-  });
-
-  $('logoutBtn').addEventListener('click', async()=>{ await supabase.auth.signOut(); showLogin(); });
-  $('refreshBtn').addEventListener('click', loadAll);
-
-  document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{
-    const tab=btn.dataset.tab;
-    document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
-    ['members','referrals','conversions','commissions'].forEach(k=>$('panel-'+k).classList.toggle('hidden',k!==tab));
-  }));
-
-  async function loadAll(){
-    const [
-      {data:members,error:me},
-      {data:referrals,error:re},
-      {data:conversions,error:ce},
-      {data:commissions,error:coe}
-    ] = await Promise.all([
-      supabase.from('members').select('*').order('created_at',{ascending:false}),
-      supabase.from('referral_relationships').select('*').order('created_at',{ascending:false}),
-      supabase.from('conversions').select('*').order('created_at',{ascending:false}),
-      supabase.from('commissions').select('*').order('created_at',{ascending:false})
-    ]);
-    const err=me||re||ce||coe;
-    if(err){ toast('資料讀取失敗'); console.error(err); return; }
-    state={members:members||[],referrals:referrals||[],conversions:conversions||[],commissions:commissions||[]};
-    render();
-  }
-
-  function memberById(id){ return state.members.find(x=>x.id===id); }
-  function memberName(id){ const m=memberById(id); return m ? (m.display_name || m.referral_code) : '—'; }
-
-  function render(){
-    $('mMembers').textContent=state.members.length;
-    $('mReferrals').textContent=state.referrals.length;
-    $('mDeals').textContent=state.conversions.filter(x=>x.status==='confirmed').length;
-    $('mPending').textContent=fmtMoney(state.commissions.filter(x=>['pending','approved'].includes(x.status)).reduce((s,x)=>s+Number(x.amount||0),0));
-
-    $('membersBody').innerHTML=state.members.map(m=>`<tr>
-      <td><span class="code">${esc(m.referral_code)}</span></td>
-      <td><strong>${esc(m.display_name||'未取得名稱')}</strong></td>
-      <td><span class="code" title="${esc(m.line_user_id)}">${esc(shortId(m.line_user_id))}</span></td>
-      <td>${fmtDate(m.first_seen_at)}</td><td>${fmtDate(m.last_seen_at)}</td>
-      <td><span class="badge ${m.status==='active'?'green':'red'}">${esc(m.status)}</span></td>
-    </tr>`).join('');
-    $('membersEmpty').classList.toggle('hidden',state.members.length>0);
-
-    $('referralsBody').innerHTML=state.referrals.map(r=>`<tr>
-      <td><strong>${esc(memberName(r.referred_member_id))}</strong><br><span class="code">${esc(memberById(r.referred_member_id)?.referral_code||'')}</span></td>
-      <td><strong>${esc(memberName(r.referrer_member_id))}</strong><br><span class="code">${esc(memberById(r.referrer_member_id)?.referral_code||'')}</span></td>
-      <td>${fmtDate(r.created_at)}</td>
-    </tr>`).join('');
-    $('referralsEmpty').classList.toggle('hidden',state.referrals.length>0);
-
-    $('conversionsBody').innerHTML=state.conversions.map(c=>`<tr>
-      <td><strong>${esc(memberName(c.customer_member_id))}</strong></td>
-      <td>${esc(memberName(c.referrer_member_id))}</td>
-      <td>${fmtMoney(c.gross_amount)}</td>
-      <td>${fmtMoney(c.commission_amount)}</td>
-      <td><span class="badge ${c.status==='confirmed'?'green':c.status==='cancelled'||c.status==='refunded'?'red':'gold'}">${esc(c.status)}</span></td>
-      <td>${fmtDate(c.created_at)}</td>
-    </tr>`).join('');
-    $('conversionsEmpty').classList.toggle('hidden',state.conversions.length>0);
-
-    $('commissionsBody').innerHTML=state.commissions.map(c=>`<tr>
-      <td><strong>${esc(memberName(c.recipient_member_id))}</strong></td>
-      <td>${fmtMoney(c.amount)}</td>
-      <td><span class="badge ${c.status==='paid'?'green':c.status==='void'?'red':'gold'}">${esc(c.status)}</span></td>
-      <td>${fmtDate(c.approved_at)}</td><td>${fmtDate(c.paid_at)}</td>
-      <td>${c.status!=='paid'&&c.status!=='void'?'<button class="ghost pay-btn" data-id="'+c.id+'">標記已發</button>':''}</td>
-    </tr>`).join('');
-    $('commissionsEmpty').classList.toggle('hidden',state.commissions.length>0);
-
-    document.querySelectorAll('.pay-btn').forEach(b=>b.addEventListener('click',()=>markPaid(b.dataset.id)));
-    $('dealCustomer').innerHTML='<option value="">請選擇</option>'+state.members.map(m=>`<option value="${m.id}">${esc(m.display_name||'未命名')}｜${esc(m.referral_code)}</option>`).join('');
-  }
-
-  $('addDealBtn').addEventListener('click',()=>$('dealModal').classList.remove('hidden'));
-  $('cancelDeal').addEventListener('click',()=>$('dealModal').classList.add('hidden'));
-  $('dealModal').addEventListener('click',(e)=>{ if(e.target===$('dealModal')) $('dealModal').classList.add('hidden'); });
-
-  $('dealForm').addEventListener('submit', async(e)=>{
-    e.preventDefault();
-    const customerId=$('dealCustomer').value;
-    const rel=state.referrals.find(r=>r.referred_member_id===customerId);
-    const amount=Number($('dealAmount').value||0);
-    const rate=Number($('dealRate').value||0)/100;
-    const commission=rel ? Math.round(amount*rate) : 0;
-    const payload={
-      customer_member_id:customerId,
-      referrer_member_id:rel?.referrer_member_id||null,
-      deal_name:$('dealName').value.trim()||null,
-      gross_amount:amount,
-      currency:'TWD',
-      commission_rate:rel?rate:null,
-      commission_amount:rel?commission:null,
-      status:'confirmed',
-      confirmed_at:new Date().toISOString(),
-      notes:$('dealNotes').value.trim()||null
-    };
-    const {data:deal,error} = await supabase.from('conversions').insert(payload).select().single();
-    if(error){ toast('建立成交失敗'); console.error(error); return; }
-    if(rel && commission>0){
-      const {error:commissionError}=await supabase.from('commissions').insert({
-        conversion_id:deal.id,
-        recipient_member_id:rel.referrer_member_id,
-        amount:commission,
-        currency:'TWD',
-        status:'pending'
-      });
-      if(commissionError) console.error(commissionError);
-    }
-    $('dealForm').reset(); $('dealRate').value='10'; $('dealModal').classList.add('hidden');
-    toast('成交已建立');
-    await loadAll();
-  });
-
-  async function markPaid(id){
-    const {error}=await supabase.from('commissions').update({status:'paid',paid_at:new Date().toISOString()}).eq('id',id);
-    if(error){ toast('更新失敗'); console.error(error); return; }
-    toast('已標記發放');
-    await loadAll();
-  }
-
-  boot();
-</script>
+<script type="module" src="./app.js"></script>
 </body>
 </html>
