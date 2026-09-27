@@ -71,3 +71,7 @@ html,body,#app{touch-action:pan-y;}
   .fact-action{font-size:10px}
   .member-deal-row{align-items:flex-start}
 }
+
+/* 2026-09-27 interaction + referral history */
+.history-timeline .event strong{display:block;line-height:1.6}
+.history-timeline .badge{margin-right:5px;vertical-align:1px}

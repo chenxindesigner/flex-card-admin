@@ -9,15 +9,20 @@ const $ = function(id){ return document.getElementById(id); };
 const fmtMoney = function(n){ return new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maximumFractionDigits:0}).format(Number(n||0)); };
 const fmtDate = function(v){ return v ? new Intl.DateTimeFormat('zh-TW',{dateStyle:'short',timeStyle:'short'}).format(new Date(v)) : '—'; };
 const esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g,function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]; }); };
-const state = { members:[], referrals:[], conversions:[], commissions:[], events:[] };
+const state = { members:[], referrals:[], conversions:[], commissions:[], interactions:[], referralHistory:[] };
 let activeMemberId = null;
 let commissionFilter = 'all';
 let dealEditingId = null;
 
 const statusLabel = {active:'正常',inactive:'停用',blocked:'封鎖',pending:'未到期',approved:'待發',paid:'已發',void:'作廢',confirmed:'已確認',cancelled:'取消',refunded:'退款'};
-const eventLabel = {
-  card_open:'開啟名片', button_click:'點擊按鈕', line_oa_click:'LINE 官網', booking_click:'預約諮詢',
-  portfolio_click:'作品集', share_started:'開始分享', share_completed:'完成分享'
+const actionLabel = {
+  open:'開啟名片',
+  portfolio:'作品集',
+  booking:'預約諮詢',
+  line_oa:'LINE 官網',
+  idea_space:'意念空間',
+  share:'好友分享',
+  share_completed:'分享完成'
 };
 
 function toast(msg){
@@ -117,7 +122,8 @@ async function loadAll(){
     supabase.from('referral_relationships').select('*').order('created_at',{ascending:false}),
     supabase.from('conversions').select('*').order('created_at',{ascending:false}),
     supabase.from('commissions').select('*').order('created_at',{ascending:false}),
-    supabase.from('interaction_events').select('*').order('occurred_at',{ascending:false}).limit(500)
+    supabase.from('member_interactions').select('*').order('last_interacted_at',{ascending:false}),
+    supabase.from('referral_history').select('*').order('occurred_at',{ascending:false})
   ]);
   const firstError = results.find(function(r){ return r.error; });
   if(firstError){
@@ -130,7 +136,8 @@ async function loadAll(){
   state.referrals=results[1].data||[];
   state.conversions=results[2].data||[];
   state.commissions=results[3].data||[];
-  state.events=results[4].data||[];
+  state.interactions=results[4].data||[];
+  state.referralHistory=results[5].data||[];
 
   renderAll();
   if(activeMemberId && !$('memberModal').classList.contains('hidden')) openMember(activeMemberId);
@@ -146,6 +153,29 @@ function ownConversions(id){ return state.conversions.filter(function(c){ return
 function commissionsForMember(id){ return state.commissions.filter(function(c){ return c.recipient_member_id===id; }); }
 function commissionFor(conversionId,stage){
   return state.commissions.find(function(c){ return c.conversion_id===conversionId && c.payout_stage===stage; });
+}
+function interactionsForMember(id){
+  return state.interactions
+    .filter(function(x){ return x.member_id===id; })
+    .sort(function(a,b){ return new Date(b.last_interacted_at)-new Date(a.last_interacted_at); });
+}
+function historyForMember(id){
+  return state.referralHistory
+    .filter(function(x){ return x.referred_member_id===id; })
+    .sort(function(a,b){ return new Date(a.occurred_at)-new Date(b.occurred_at); });
+}
+function sourceHistoryText(h){
+  const current=memberById(h.referrer_member_id);
+  const previous=memberById(h.previous_referrer_member_id);
+  const sourceName=lineDisplay(current);
+  const action=actionLabel[h.action]||h.action||'';
+  if(h.event_type==='reassigned'){
+    return '正式推薦人變更：'+lineDisplay(previous)+' → '+sourceName+(action?' · '+action:'');
+  }
+  if(h.event_type==='assigned'){
+    return '正式推薦人建立：'+sourceName+(action?' · '+action:'');
+  }
+  return '曾從 '+sourceName+' 的名片進入'+(action?' · '+action:'');
 }
 
 function renderAll(){
@@ -189,6 +219,10 @@ function renderMembers(){
     const pending=commissionsForMember(m.id)
       .filter(function(c){ return c.status==='approved'; })
       .reduce(function(s,c){ return s+Number(c.amount||0); },0);
+    const latestInteraction=interactionsForMember(m.id)[0]||null;
+    const latestNote=latestInteraction
+      ? '<span class="mini-stat">最近 '+esc(actionLabel[latestInteraction.action]||latestInteraction.action)+' · '+fmtDate(latestInteraction.last_interacted_at)+'</span>'
+      : '';
     const lineNote=m.admin_name && m.display_name ? 'LINE：'+esc(m.display_name)+' · ' : '';
     const badgeClass=m.status==='active'?'green':'red';
 
@@ -201,6 +235,7 @@ function renderMembers(){
           '<span class="mini-stat">已推薦 '+referrals+'</span>'+
           '<span class="mini-stat">成交 '+deals+'</span>'+
           '<span class="mini-stat">待發 '+fmtMoney(pending)+'</span>'+
+          latestNote+
         '</div>'+
       '</div>'+
       '<div class="arrow">›</div>'+
@@ -347,7 +382,8 @@ function openMember(id){
   const ownDealTotal=ownDeals.reduce(function(sum,c){ return sum+Number(c.gross_amount||0); },0);
   const totalCommission=cms.reduce(function(sum,c){ return sum+Number(c.amount||0); },0);
   const pending=cms.filter(function(c){ return c.status==='approved'; }).reduce(function(sum,c){ return sum+Number(c.amount||0); },0);
-  const events=state.events.filter(function(e){ return e.member_id===id; }).slice(0,12);
+  const interactions=interactionsForMember(id);
+  const sourceHistory=historyForMember(id);
 
   const referrerFact = rel
     ? '<div class="fact fact-referrer"><div class="k">直接推薦人</div><div class="v">'+esc(lineDisplay(referrer))+'</div><div class="fact-note">'+esc(referrer?.referral_code||'')+'</div></div>'
@@ -389,13 +425,26 @@ function openMember(id){
       '<option value="inactive" '+(m.status==='inactive'?'selected':'')+'>停用</option>'+
       '<option value="blocked" '+(m.status==='blocked'?'selected':'')+'>封鎖</option>'+
     '</select></div>'+
-    '<div class="section-title">最近互動</div>'+
+    '<div class="section-title">按鈕互動</div>'+
     '<div class="timeline">'+
-      (events.length
-        ? events.map(function(e){
-            return '<div class="event"><strong>'+esc(eventLabel[e.event_type]||e.button_key||e.event_type)+'</strong><small>'+fmtDate(e.occurred_at)+(e.button_key?' · '+esc(e.button_key):'')+'</small></div>';
+      (interactions.length
+        ? interactions.map(function(e){
+            const source=e.last_referrer_member_id ? memberById(e.last_referrer_member_id) : null;
+            return '<div class="event"><strong>'+esc(actionLabel[e.action]||e.action)+'</strong><small>最後互動 '+fmtDate(e.last_interacted_at)+
+              (source?' · 最後來源 '+esc(lineDisplay(source)):'')+
+              '</small></div>';
           }).join('')
         : '<div class="empty">目前尚無互動紀錄</div>')+
+    '</div>'+
+    '<div class="section-title">推薦來源歷程</div>'+
+    '<div class="timeline history-timeline">'+
+      (sourceHistory.length
+        ? sourceHistory.map(function(h){
+            const kind=h.event_type==='reassigned'?'變更':h.event_type==='assigned'?'成立':'來源';
+            const badgeClass=h.event_type==='reassigned'?'orange':h.event_type==='assigned'?'green':'';
+            return '<div class="event"><strong><span class="badge '+badgeClass+'">'+kind+'</span> '+esc(sourceHistoryText(h))+'</strong><small>'+fmtDate(h.occurred_at)+'</small></div>';
+          }).join('')
+        : '<div class="empty">目前尚無推薦來源歷程</div>')+
     '</div>';
 
   $('memberActions').innerHTML=
